@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect, createContext } from "react";
 import Categoria from "../components/Categoria";
+import { toast } from "react-toastify";
 
 const QuioscoContext = createContext();
 
@@ -38,17 +39,30 @@ const QuioscoProvider = ({ children }) => {
   };
 
   // por medio de destructuring sacamos del objeto la imagen y la categoriaId
-  const handleAgregarPedido = ({ imagen, categoriaId, ...producto }) => {
+  const handleAgregarPedido = ({ categoriaId, ...producto }) => {
     if (pedido.some((productoState) => productoState.id === producto.id)) {
       // actualizar la cantidad
       const pedidoActualizado = pedido.map((productoState) =>
         productoState.id === producto.id ? producto : productoState
       );
       setPedido(pedidoActualizado);
+      toast.success("Guardado correctamente");
     } else {
       setPedido([...pedido, producto]);
+      toast.success("Agregado al pedido");
     }
     setModal(false);
+  };
+
+  const handleEditarCantidades = (id) => {
+    const productoActualizar = pedido.filter((producto) => producto.id === id);
+    setProducto(productoActualizar[0]);
+    setModal(!modal);
+  };
+
+  const handleEliminarProducto = (id) => {
+    const pedidoActualizado = pedido.filter((producto) => producto.id !== id);
+    setPedido(pedidoActualizado);
   };
   return (
     <QuioscoContext.Provider
@@ -62,6 +76,8 @@ const QuioscoProvider = ({ children }) => {
         handleChangeModal,
         handleAgregarPedido,
         pedido,
+        handleEditarCantidades,
+        handleEliminarProducto,
       }}
     >
       {children}
